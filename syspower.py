@@ -121,7 +121,8 @@ def _generic_unix_shutdown():
     for prefix in CONSOLE_AUTH_TYPES:
         tmpcmdlist = list()
         for i in range(0, len(cmdlist)):
-            tmpcmdlist[i] = prefix + cmdlist[i]
+            tmpcmdlist.append(cmdlist[i])
+            tmpcmdlist[i].insert(0, prefix)
         if _try_commands(tmpcmdlist):
             return True
     if _try_commands(cmdlist):
@@ -144,7 +145,8 @@ def _generic_unix_reboot():
     for prefix in CONSOLE_AUTH_TYPES:
         tmpcmdlist = list()
         for i in range(0, len(cmdlist)):
-            tmpcmdlist[i] = prefix + cmdlist[i]
+            tmpcmdlist.append(cmdlist[i])
+            tmpcmdlist[i].insert(0, prefix)
         if _try_commands(tmpcmdlist):
             return True
     if _try_commands(cmdlist):
