@@ -62,10 +62,10 @@ def _try_commands(commands):
     '''Tries each command in sequence, returning True if one succeeded and False otherwise.'''
     for command in commands:
         try:
-            status = os.system(command)
+            status = subprocess.check_call(command, shell=True)
             if status == 0:
                 return True
-        except OSError:
+        except subprocess.SubprocessError:
             pass
     return False
 
@@ -75,12 +75,12 @@ def _get_shutdown_poweroff_opts():
        This is needed because options are inconsistent between modern
        Linux, old Linux, SVR4 derived systems, BSD derived systems,
        and Solaris derived systems.'''
-    if os.system == 'posix' and sys.platform.startswith('darwin'):
+    if os.name == 'posix' and sys.platform.startswith('darwin'):
         # Assume we're on OS X, which wants no arguments for poweroff
         return ''
     try:
         shutdownhelp = subprocess.check_output(['shutdown', '--help'], shell=True)
-    except subprocess.CalledProcessError:
+    except subprocess.SubprocessError:
         # Either shutdown doesn't support --help (which means it's
         # ancient), or doesn't exist.  In either case, assume old
         # Linux/SVR4 options, which should work on most systems (at
@@ -110,10 +110,10 @@ def _generic_unix_shutdown():
        and halt in that order (some of thewse will actually work if
        we're not root).'''
     cmdlist = [
-        'shutdown ' + _get_shutdown_poweroff_opts() + ' now',
-        'poweroff',
-        'telinit 0',
-        'halt'
+        ['shutdown', _get_shutdown_poweroff_opts(), 'now'],
+        ['poweroff'],
+        ['teliniti', '0'],
+        ['halt']
     ]
     if os.geteuid() == 0:
         if _try_commands(cmdlist):
@@ -134,9 +134,9 @@ def _generic_unix_reboot():
        Similar arrangement to _generic_unix_shutdown, just with
        shutdown -r, reboot, and telinit 6.'''
     cmdlist = [
-        'shutdown -r now',
-        'reboot',
-        'telinit 6'
+        ['shutdown', '-r', 'now'],
+        ['reboot'],
+        ['telinit', '6']
     ]
     if os.geteuid() == 0:
         if _try_commands(cmdlist):
@@ -160,7 +160,7 @@ def shutdown():
        method that works or the platform is unsupported).  In the event
        that we do return, we'll return true if we think things worked
        (which may not mean that they actually did work).'''
-    if os.system == 'posix':
+    if os.name == 'posix':
         if sys.platform.startswith('linux'):
             if _generic_unix_shutdown():
                 return True
@@ -174,10 +174,10 @@ def shutdown():
             # that behaves like telinit with confirmation, try that first
             # before trying the generic UNIX shutdown stuff.
             try:
-                status = os.system('shutdown -y -i 5 5')
+                status = subprocess.check_call(['shutdown', '-y', '-i 5', '5'], shell=True)
                 if status == 0:
                     return True
-            except OSError:
+            except subprocess.SubprocessError:
                 pass
             if _generic_unix_shutdown():
                 return True
@@ -185,12 +185,12 @@ def shutdown():
         if _generic_unix_shutdown():
             return True
         raise NoWorkingMethod
-    elif os.system == 'nt':
+    elif os.name == 'nt':
         try:
-            status = os.system('shutdown /s')
+            status = subprocess.check_call(['shutdown', '/s'], shell=True)
             if status == 0:
                 return True
-        except OSError:
+        except subprocess.SubprocessError:
             pass
         raise NoWorkingMethod
     else:
@@ -205,7 +205,7 @@ def reboot():
        method that works or the platform is unsupported).  In the event
        that we do return, we'll return true if we think things worked
        (which may not mean that they actually did work).'''
-    if os.system == 'posix':
+    if os.name == 'posix':
         if sys.platform.startswith('linux'):
             if _generic_unix_reboot():
                 return True
@@ -219,8 +219,8 @@ def reboot():
             # that behaves like telinit with confirmation, try that first
             # before trying the generic UNIX reboot stuff.
             try:
-                status = os.system('shutdown -y -i 6 6')
-            except OSError:
+                status = subprocess.check_call(['shutdown', '-y', '-i 6', '6'], shell=True)
+            except subprocess.SubprocessError:
                 pass
             if status == 0:
                 return True
@@ -230,12 +230,12 @@ def reboot():
         if _generic_unix_reboot():
             return True
         raise NoWorkingMethod
-    elif os.system == 'nt':
+    elif os.name == 'nt':
         try:
-            status = os.system('shutdown /r')
+            status = subprocess.check_call(['shutdown', '/r'], shell=True)
             if status == 0:
                 return True
-        except OSError:
+        except subprocess.SubprocessError:
             pass
         raise NoWorkingMethod
     else:
@@ -251,16 +251,14 @@ def suspend():
        system has actually suspended to RAM, or it may not return until
        after the system next wakes up.  In either case, if there was no
        error, it will return True.'''
-    if os.system == 'posix':
+    if os.name == 'posix':
         if sys.platform.startswith('linux'):
             raise UnsupportedOperation
         elif sys.platform.startswith('darwin'):
             raise UnsupportedOperation
         else:
             raise UnsupportedOperation
-    elif os.system == 'nt':
-        raise UnsupportedOperation
-    elif os.system == 'java':
+    elif os.name == 'nt':
         raise UnsupportedOperation
     else:
         raise UnsupportedOperation
@@ -269,16 +267,14 @@ def hibernate():
     '''Hibernate/Suspend to disk.
 
        This is an OS mediated operation, not a firmware mediated one.'''
-    if os.system == 'posix':
+    if os.name == 'posix':
         if sys.platform.startswith('linux'):
             raise UnsupportedOperation
         elif sys.platform.startswith('darwin'):
             raise UnsupportedOperation
         else:
             raise UnsupportedOperation
-    elif os.system == 'nt':
-        raise UnsupportedOperation
-    elif os.system == 'java':
+    elif os.name == 'nt':
         raise UnsupportedOperation
     else:
         raise UnsupportedOperation
