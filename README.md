@@ -19,12 +19,11 @@ implemented on at least one supported platform:
  * Shutdown
  * Reboot
  * Suspend to disk
+ * Suspend to RAM
 
 The following functions are planned to be implemented:
  * Lock screen/activate screensaver
  * Log out
- * Suspend to RAM
- * Hybrid suspend (both to RAM and to disk)
 
 The following methods of privilege elevation are supported for non-root
 users on UNIX-like systems:
@@ -38,7 +37,8 @@ users on UNIX-like systems:
 Supports the following functionality:
  * Shutdown
  * Reboot
- * Suspend to disk
+ * Suspend to disk/hibernate
+ * Suspend to RAM
 
 Session management integration is currently not implemented, but is
 planned.
@@ -47,18 +47,31 @@ planned.
 Supports the following functionality:
  * Shutdown
  * Reboot
+ * Suspend to RAM (untested, probably only works on FreeBSD)
 
 As with Linux, session management integration is not currently
 implemented, but support is planned.
+
+Suspend to RAM support for BSD is completely untested, it may or may
+not work, and the method used is based on FreeBSD documentation, so it
+may or may not work on other BSD systems.
 
 ###### macOS / OS X ######
 Supports the following functionality:
  * Shutdown
  * Reboot
+ * Suspend to RAM
 
 Current support is very rudimentary and lacks proper desktop integration.
 I hope to eventually have proper support, but it's not a priority for
 me since I don't use OS X myself.
+
+I'm about 90% certain that OS X actually does a hybrid sleep when you
+tell it to suspend.  It's impossible to be 100% certain though because
+of the tight firmware integration of the OS and the inability to verify
+if anything is powered.  However, because the resume behavior is
+consistent in all cases I've seen with suspend to RAM performance for
+other systems, I'm listing it as such since it fills a similar usage.
 
 ###### Other UNIX-like systems ######
 Supports the following functionality:
@@ -84,7 +97,13 @@ version of shutdown that doesn't work at all like any of the standard UNIX
 Supports the following functionality:
  * Shutdown
  * Reboot
- * Suspend to disk
+ * Suspend to disk/hibernate
+
+On current versions of Windows (8 and newer), there's no practical way
+that I know of to get the system to actually suspend to RAM  without
+using compiled code (which I absolutely want to avoid).  If someone can
+find a way that doesn't involve compiled code or extra dependencies,
+send me a (tested) patch, and I'll be happy to include it.
 
 ### TODO ###
  * Implement missing functionality, and document what can't be implemented.

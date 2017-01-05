@@ -255,9 +255,43 @@ def suspend():
        error, it will return True.'''
     if os.name == 'posix':
         if sys.platform.startswith('linux'):
-            raise UnsupportedOperation
+            try:
+                status = subprocess.check_call(['pm-suspend'], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+            try:
+                status = subprocess.check_call(['s2ram'], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+            try:
+                support = subprocess.check_output(['cat', '/sys/power/state'], shell=True)
+                if support.find(b'mem') != -1:
+                    with open('/sys/power/state', 'wb') as state:
+                        if state.write('mem'):
+                            return True
+            except (subprocess.SubprocessError, IOError, OSError):
+                pass
+            raise NoWorkingMethod
         elif sys.platform.startswith('darwin'):
-            raise UnsupportedOperation
+            try:
+                status = subprocess.check_call(['shutdown', '-s', 'now'], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+            raise NoWorkingMethod
+        elif sys.platform.startswith('freebsd'):
+            try:
+                status = subprocess.check_call(['acpiconf', '-s', '3'], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+            raise NoWorkingMethod
         else:
             raise UnsupportedOperation
     elif os.name == 'nt':
