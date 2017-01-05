@@ -18,12 +18,13 @@ As of right now, the following functions are at least partially
 implemented on at least one supported platform:
  * Shutdown
  * Reboot
+ * Suspend to disk
 
 The following functions are planned to be implemented:
  * Lock screen/activate screensaver
  * Log out
  * Suspend to RAM
- * Suspend to disk
+ * Hybrid suspend (both to RAM and to disk)
 
 The following methods of privilege elevation are supported for non-root
 users on UNIX-like systems:
@@ -37,6 +38,7 @@ users on UNIX-like systems:
 Supports the following functionality:
  * Shutdown
  * Reboot
+ * Suspend to disk
 
 Session management integration is currently not implemented, but is
 planned.
@@ -82,6 +84,7 @@ version of shutdown that doesn't work at all like any of the standard UNIX
 Supports the following functionality:
  * Shutdown
  * Reboot
+ * Suspend to disk
 
 ### TODO ###
  * Implement missing functionality, and document what can't be implemented.

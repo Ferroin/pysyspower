@@ -271,12 +271,46 @@ def hibernate():
        This is an OS mediated operation, not a firmware mediated one.'''
     if os.name == 'posix':
         if sys.platform.startswith('linux'):
-            raise UnsupportedOperation
+            try:
+                status = subprocess.check_call(['pm-hibernate'], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+            try:
+                status = subprocess.check_call(['s2disk'], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+            try:
+                support = subprocess.check_output(['cat', '/sys/power/state'], shell=True)
+                if support.find(b'disk') != -1:
+                    with open('/sys/power/state', 'wb') as state:
+                        if state.write('disk'):
+                            return True
+            except (subprocess.SubprocessError, IOError, OSError):
+                pass
+            raise NoWorkingMethod
         elif sys.platform.startswith('darwin'):
             raise UnsupportedOperation
+        elif sys.platform.find('BSD') != -1:
+            try:
+                status = subprocess.check_call(['pm-hibernate'], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+            raise NoWorkingMethod
         else:
             raise UnsupportedOperation
     elif os.name == 'nt':
-        raise UnsupportedOperation
+        try:
+            status = subprocess.check_call(['shutdown', '/h'], shell=True)
+            if status == 0:
+                return True
+        except subprocess.SubprocessError:
+            pass
+        raise NoWorkingMethod
     else:
         raise UnsupportedOperation
