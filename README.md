@@ -1,12 +1,17 @@
-# syspower #
-syspower is a Python 3.x library for (reasonably) cross platform control
-of system power states.  It abstracts away most of the platform specific
-stuff involving thing such as shutting down the system, rebooting,
-and similar tasks.  It originated because I couldn't find any similar
-libraries and needed this functionality for one of my other projects.
+# pysyspower #
+pysyspower is a Python 3.1+ library for (reasonably) cross platform
+control of system power states and related session management.
+It abstracts away most of the platform specific stuff involving
+thing such as shutting down the system, rebooting, and similar tasks.
+It originated because I couldn't find any similar libraries and needed
+this functionality for one of my other projects.
 
-syspower is licensed under a 2 clause BSD license, check LICENSE or the
+pysyspower is licensed under a 2 clause BSD license, check LICENSE or the
 docstring for the exact details.
+
+pysyspower needs at minimum Python 3.1, but has no other dependencies
+beyond the standard library and the basic tools already found on most
+systems.
 
 ### Functionality ###
 As of right now, the following functions are at least partially
