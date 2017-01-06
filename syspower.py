@@ -125,6 +125,7 @@ def _get_shutdown_poweroff_opts():
 def _generic_unix_shutdown():
     '''Internal function that tries methods that are generic to most UNIX systems.'''
     cmdlist = [
+        ['systemctl', 'poweroff'],
         ['shutdown', _get_shutdown_poweroff_opts(), 'now'],
         ['poweroff'],
         ['teliniti', '0'],
@@ -170,6 +171,7 @@ def _unix_gui_shutdown():
 def _generic_unix_reboot():
     '''Internal function that tries methods that are generic to most UNIX systems.'''
     cmdlist = [
+        ['systemctl', 'reboot'],
         ['shutdown', '-r', 'now'],
         ['reboot'],
         ['telinit', '6']
