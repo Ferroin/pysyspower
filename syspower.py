@@ -38,11 +38,11 @@ import sys
 import os
 import subprocess
 
-CONSOLE_AUTH_TYPES = {
-    'sudo -n',
-    'doas -n',
-    'pkexec'
-}
+CONSOLE_AUTH_TYPES = [
+    ['sudo', '-n'],
+    ['doas', '-n'],
+    ['pkexec']
+]
 
 class UnsupportedOperation(Exception):
     '''Raised when a particular operation is not supported on the current platform.
@@ -121,8 +121,7 @@ def _generic_unix_shutdown():
     for prefix in CONSOLE_AUTH_TYPES:
         tmpcmdlist = list()
         for i in range(0, len(cmdlist)):
-            tmpcmdlist.append(cmdlist[i])
-            tmpcmdlist[i].insert(0, prefix)
+            tmpcmdlist[i] = prefix + cmdlist[i]
         if _try_commands(tmpcmdlist):
             return True
     if _try_commands(cmdlist):
@@ -153,7 +152,7 @@ def _unix_gui_shutdown():
         ['mate-session-quit', '--power-off', '--force'],
         ['xfce4-session-logout', '--halt']
     ]
-    for cmd in cmdlist:
+    for cmd in cmds:
         for search in searchpath:
             if os.access(os.path.join(search, cmd[0]), os.X_OK):
                 try:
@@ -180,8 +179,7 @@ def _generic_unix_reboot():
     for prefix in CONSOLE_AUTH_TYPES:
         tmpcmdlist = list()
         for i in range(0, len(cmdlist)):
-            tmpcmdlist.append(cmdlist[i])
-            tmpcmdlist[i].insert(0, prefix)
+            tmpcmdlist[i] = prefix + cmdlist[i]
         if _try_commands(tmpcmdlist):
             return True
     if _try_commands(cmdlist):
