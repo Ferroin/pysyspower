@@ -35,13 +35,14 @@ users on UNIX-like systems:
  * pkexec (PolicyKit, requires special setup and is pretty much completely
    untested)
 
-Session manager integration is offered for the following desktop
-environments on (most) UNIX-like systems:
+Session manager integration supporting shutdown, reboot, and logout
+is offered for the following desktop environments on (most) UNIX-like
+systems:
  * GNOME (2.10 and newer)
  * MATE
  * Cinnamon
- * XFCE4
- * KDE (shutdown and logout support only)
+ * XFCE (4.x series)
+ * KDE (4.0 and newer)
 
 ### Platform support ###
 ###### Linux ######
@@ -53,18 +54,12 @@ Supports the following functionality:
  * Hybrid suspend
  * Log out of the current GUI session
 
-Session management integration is incomplete, KDE is only partially
-supported, and LXDE can't be supported without some complex DBus RPC's.
-
 ###### BSD ######
 Supports the following functionality:
  * Shutdown
  * Reboot
  * Suspend to RAM (untested, probably only works on FreeBSD)
  * Log out of the current GUI session
-
-Session management integration is incomplete, KDE is only partially
-supported, and LXDE can't be supported without some complex DBus RPC's.
 
 Suspend to RAM support for BSD is completely untested, it may or may
 not work, and the method used is based on FreeBSD documentation, so it

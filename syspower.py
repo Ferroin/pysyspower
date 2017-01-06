@@ -141,14 +141,7 @@ def _unix_gui_shutdown():
         * GNOME 2 and 3
         * MATE
         * XFCE 4
-        * KDE 4 and 5
-
-       I plan to try to get it working with the following as well:
-        * LXDE/LXQT
-
-       The following might be supported if I can figure out how to do it:
-        * E17
-        * Enlightenment '''
+        * KDE 4 and 5'''
     searchpath = os.get_exec_path()
     cmds = [
         ['gnome-session-quit', '--power-off', '--force'],
@@ -177,6 +170,34 @@ def _generic_unix_reboot():
         ['telinit', '6']
     ]
     return _try_commands(cmdlist)
+
+def _unix_gui_reboot():
+    '''Try all the different session management shutdown commands we know about.
+
+       This currently works with:
+        * Cinnamon
+        * GNOME 2 and 3
+        * MATE
+        * XFCE 4
+        * KDE 4 and 5'''
+    searchpath = os.get_exec_path()
+    cmds = [
+        ['gnome-session-quit', '--reboot', '--force'],
+        ['cinnamon-session-quit', '--reboot', '--force'],
+        ['mate-session-quit', '--reboot', '--force'],
+        ['xfce4-session-logout', '--reboot'],
+        ['qdbus', 'org.kde.ksmserver', '/KSMServer', 'org.kde.KSMServerInterface.logout', '0', '2', '1']
+    ]
+    for cmd in cmds:
+        for search in searchpath:
+            if os.access(os.path.join(search, cmd[0]), os.X_OK):
+                try:
+                    status = subprocess.check_call(cmd, shell=True)
+                    if status == 0:
+                        return True
+                except subprocess.SubprocessError:
+                    pass
+    return False
 
 def _linux_suspend():
     '''Internal function to try different suspend methods on Linux.
@@ -341,6 +362,8 @@ def reboot():
        (which may not mean that they actually did work).'''
     if os.name == 'posix':
         if sys.platform.startswith('linux'):
+            if _unix_gui_reboot():
+                return True
             if _generic_unix_reboot():
                 return True
             raise NoWorkingMethodError
@@ -361,6 +384,8 @@ def reboot():
             if _generic_unix_reboot():
                 return True
             raise NoWorkingMethodError
+        if _unix_gui_reboot():
+            return True
         if _generic_unix_reboot():
             return True
         raise NoWorkingMethodError
