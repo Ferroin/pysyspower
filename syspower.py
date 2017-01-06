@@ -44,13 +44,17 @@ CONSOLE_AUTH_TYPES = [
     ['pkexec']
 ]
 
-class UnsupportedOperation(Exception):
+
+class SyspowerException(Exception):
+    '''Base class for other errors.'''
+
+class UnsupportedOperationError(SyspowerException):
     '''Raised when a particular operation is not supported on the current platform.
 
        This is essentially the same as returning NotImplemented, we just
        use a different name to be more clear.'''
 
-class NoWorkingMethod(Exception):
+class NoWorkingMethodError(SyspowerException):
     '''Raised when a method for the operation can't be found for the platform.
 
        In essence, if you get this, we technically support the platform,
@@ -262,11 +266,11 @@ def shutdown():
                 return True
             if _generic_unix_shutdown():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         elif sys.platform.startswith('darwin'):
             if _generic_unix_shutdown():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         elif sys.platform.startswith('SunOS') or sys.platform.startswith('solaris'):
             # Newer versions of Solaris have a wierd shutdown command
             # that behaves like telinit with confirmation, try that first
@@ -279,12 +283,12 @@ def shutdown():
                 pass
             if _generic_unix_shutdown():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         if _unix_gui_shutdown():
             return True
         if _generic_unix_shutdown():
             return True
-        raise NoWorkingMethod
+        raise NoWorkingMethodError
     elif os.name == 'nt':
         try:
             status = subprocess.check_call(['shutdown', '/s'], shell=True)
@@ -292,9 +296,9 @@ def shutdown():
                 return True
         except subprocess.SubprocessError:
             pass
-        raise NoWorkingMethod
+        raise NoWorkingMethodError
     else:
-        raise UnsupportedOperation
+        raise UnsupportedOperationError
 
 def reboot():
     '''Initiate a system reboot.
@@ -309,11 +313,11 @@ def reboot():
         if sys.platform.startswith('linux'):
             if _generic_unix_reboot():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         elif sys.platform.startswith('darwin'):
             if _generic_unix_reboot():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         elif sys.platform.startswith('SunOS') or sys.platform.startswith('solaris'):
             # Newer versions of Solaris have a wierd shutdown command
             # that behaves like telinit with confirmation, try that first
@@ -326,10 +330,10 @@ def reboot():
                 return True
             if _generic_unix_reboot():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         if _generic_unix_reboot():
             return True
-        raise NoWorkingMethod
+        raise NoWorkingMethodError
     elif os.name == 'nt':
         try:
             status = subprocess.check_call(['shutdown', '/r'], shell=True)
@@ -337,9 +341,9 @@ def reboot():
                 return True
         except subprocess.SubprocessError:
             pass
-        raise NoWorkingMethod
+        raise NoWorkingMethodError
     else:
-        raise UnsupportedOperation
+        raise UnsupportedOperationError
 
 def suspend():
     '''Suspend to RAM.
@@ -355,7 +359,7 @@ def suspend():
         if sys.platform.startswith('linux'):
             if _linux_suspend():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         elif sys.platform.startswith('darwin'):
             try:
                 status = subprocess.check_call(['shutdown', '-s', 'now'], shell=True)
@@ -363,7 +367,7 @@ def suspend():
                     return True
             except subprocess.SubprocessError:
                 pass
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         elif sys.platform.startswith('freebsd'):
             try:
                 status = subprocess.check_call(['acpiconf', '-s', '3'], shell=True)
@@ -371,13 +375,13 @@ def suspend():
                     return True
             except subprocess.SubprocessError:
                 pass
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         else:
-            raise UnsupportedOperation
+            raise UnsupportedOperationError
     elif os.name == 'nt':
-        raise UnsupportedOperation
+        raise UnsupportedOperationError
     else:
-        raise UnsupportedOperation
+        raise UnsupportedOperationError
 
 def hibernate():
     '''Hibernate/Suspend to disk.
@@ -387,9 +391,9 @@ def hibernate():
         if sys.platform.startswith('linux'):
             if _linux_hibernate():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         elif sys.platform.startswith('darwin'):
-            raise UnsupportedOperation
+            raise UnsupportedOperationError
         elif sys.platform.find('BSD') != -1:
             try:
                 status = subprocess.check_call(['pm-hibernate'], shell=True)
@@ -397,9 +401,9 @@ def hibernate():
                     return True
             except subprocess.SubprocessError:
                 pass
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         else:
-            raise UnsupportedOperation
+            raise UnsupportedOperationError
     elif os.name == 'nt':
         try:
             status = subprocess.check_call(['shutdown', '/h'], shell=True)
@@ -407,9 +411,9 @@ def hibernate():
                 return True
         except subprocess.SubprocessError:
             pass
-        raise NoWorkingMethod
+        raise NoWorkingMethodError
     else:
-        raise UnsupportedOperation
+        raise UnsupportedOperationError
 
 def hybrid_sleep():
     '''Enter hybrid sleep.
@@ -426,8 +430,8 @@ def hybrid_sleep():
         if sys.platform.startswith('linux'):
             if _linux_hybrid_sleep():
                 return True
-            raise NoWorkingMethod
+            raise NoWorkingMethodError
         else:
-            raise UnsupportedOperation
+            raise UnsupportedOperationError
     else:
-        raise UnsupportedOperation
+        raise UnsupportedOperationError
