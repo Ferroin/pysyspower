@@ -59,7 +59,29 @@ class NoWorkingMethod(Exception):
 
 
 def _try_commands(commands):
-    '''Tries each command in sequence, returning True if one succeeded and False otherwise.'''
+    '''Try to get at least one command to run.
+
+       This first checks if we're root, and if so just tries all the
+       commands and fails if none work.  Then it tries each of the
+       privelege elevation methods, and finally just tries every command
+       by itself.'''
+    if os.geteuid() == 0:
+        for command in commands:
+            try:
+                status = subprocess.check_call(command, shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
+        return False
+    for prefix in CONSOLE_AUTH_TYPES:
+        for i in range(0, len(commands)):
+            try:
+                status = subprocess.check_call(prefix + commands[i], shell=True)
+                if status == 0:
+                    return True
+            except subprocess.SubprocessError:
+                pass
     for command in commands:
         try:
             status = subprocess.check_call(command, shell=True)
@@ -97,36 +119,14 @@ def _get_shutdown_poweroff_opts():
         return ''
 
 def _generic_unix_shutdown():
-    '''Internal function that tries methods that are generic to most UNIX systems.
-
-       First, we check if we're EUID 0, and if so just try calling
-       shutdown directly (followed by poweroff and halt if they exist
-       and shutdown fails).
-
-       Then we try to call them in the same order using the various
-       methods in CONSOLE_AUTH_TYPES.
-
-       Third we try directly calling shutdown, poweroff, telinit 0,
-       and halt in that order (some of thewse will actually work if
-       we're not root).'''
+    '''Internal function that tries methods that are generic to most UNIX systems.'''
     cmdlist = [
         ['shutdown', _get_shutdown_poweroff_opts(), 'now'],
         ['poweroff'],
         ['teliniti', '0'],
         ['halt']
     ]
-    if os.geteuid() == 0:
-        if _try_commands(cmdlist):
-            return True
-    for prefix in CONSOLE_AUTH_TYPES:
-        tmpcmdlist = list()
-        for i in range(0, len(cmdlist)):
-            tmpcmdlist[i] = prefix + cmdlist[i]
-        if _try_commands(tmpcmdlist):
-            return True
-    if _try_commands(cmdlist):
-        return True
-    return False
+    return _try_commands(cmdlist)
 
 def _unix_gui_shutdown():
     '''Try all the different session management shutdown commands we know about.
@@ -164,27 +164,62 @@ def _unix_gui_shutdown():
     return False
 
 def _generic_unix_reboot():
-    '''Internal function that tries methods that are generic to most UNIX systems.
-
-       Similar arrangement to _generic_unix_shutdown, just with
-       shutdown -r, reboot, and telinit 6.'''
+    '''Internal function that tries methods that are generic to most UNIX systems.'''
     cmdlist = [
         ['shutdown', '-r', 'now'],
         ['reboot'],
         ['telinit', '6']
     ]
-    if os.geteuid() == 0:
-        if _try_commands(cmdlist):
-            return True
-    for prefix in CONSOLE_AUTH_TYPES:
-        tmpcmdlist = list()
-        for i in range(0, len(cmdlist)):
-            tmpcmdlist[i] = prefix + cmdlist[i]
-        if _try_commands(tmpcmdlist):
-            return True
+    return _try_commands(cmdlist)
+
+def _linux_suspend():
+    '''Internal function to try different suspend methods on Linux.
+
+       At the moment, this has zero session management integration.'''
+    cmdlist = [
+        ['systemctl', 'suspend'],
+        ['pm-suspend'],
+        ['s2ram']
+    ]
     if _try_commands(cmdlist):
         return True
+    try:
+        # This only works if we're root, and the other methods are much
+        # safer for userspace, but if we're root this is certain to work
+        # (assuming the hardware and driver work correctly.
+        support = subprocess.check_output(['cat', '/sys/power/state'], shell=True)
+        if support.find(b'mem') != -1:
+            with open('/sys/power/state', 'wb') as state:
+                if state.write('mem'):
+                    return True
+    except (subprocess.SubprocessError, IOError, OSError):
+        pass
     return False
+
+def _linux_hibernate():
+    '''Internal function to try different hibernate methods on Linux.
+
+       At the moment, this has zero session management integration.'''
+    cmdlist = [
+        ['systemctl', 'hibernate'],
+        ['pm-hibernate'],
+        ['s2disk']
+    ]
+    if _try_commands(cmdlist):
+        return True
+    try:
+        # This only works if we're root, and the other methods are much
+        # safer for userspace, but if we're root this is certain to work
+        # (assuming the hardware and driver work correctly.
+        support = subprocess.check_output(['cat', '/sys/power/state'], shell=True)
+        if support.find(b'disk') != -1:
+            with open('/sys/power/state', 'wb') as state:
+                if state.write('disk'):
+                    return True
+    except (subprocess.SubprocessError, IOError, OSError):
+        pass
+    return False
+
 
 def shutdown():
     '''Initiate a system shutdown.
@@ -292,26 +327,8 @@ def suspend():
        error, it will return True.'''
     if os.name == 'posix':
         if sys.platform.startswith('linux'):
-            try:
-                status = subprocess.check_call(['pm-suspend'], shell=True)
-                if status == 0:
-                    return True
-            except subprocess.SubprocessError:
-                pass
-            try:
-                status = subprocess.check_call(['s2ram'], shell=True)
-                if status == 0:
-                    return True
-            except subprocess.SubprocessError:
-                pass
-            try:
-                support = subprocess.check_output(['cat', '/sys/power/state'], shell=True)
-                if support.find(b'mem') != -1:
-                    with open('/sys/power/state', 'wb') as state:
-                        if state.write('mem'):
-                            return True
-            except (subprocess.SubprocessError, IOError, OSError):
-                pass
+            if _linux_suspend():
+                return True
             raise NoWorkingMethod
         elif sys.platform.startswith('darwin'):
             try:
@@ -342,26 +359,8 @@ def hibernate():
        This is an OS mediated operation, not a firmware mediated one.'''
     if os.name == 'posix':
         if sys.platform.startswith('linux'):
-            try:
-                status = subprocess.check_call(['pm-hibernate'], shell=True)
-                if status == 0:
-                    return True
-            except subprocess.SubprocessError:
-                pass
-            try:
-                status = subprocess.check_call(['s2disk'], shell=True)
-                if status == 0:
-                    return True
-            except subprocess.SubprocessError:
-                pass
-            try:
-                support = subprocess.check_output(['cat', '/sys/power/state'], shell=True)
-                if support.find(b'disk') != -1:
-                    with open('/sys/power/state', 'wb') as state:
-                        if state.write('disk'):
-                            return True
-            except (subprocess.SubprocessError, IOError, OSError):
-                pass
+            if _linux_hibernate():
+                return True
             raise NoWorkingMethod
         elif sys.platform.startswith('darwin'):
             raise UnsupportedOperation
