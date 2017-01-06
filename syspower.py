@@ -129,6 +129,41 @@ def _generic_unix_shutdown():
         return True
     return False
 
+def _unix_gui_shutdown():
+    '''Try all the different session management shutdown commands we know about.
+
+       This currently works with:
+        * Cinnamon
+        * GNOME 2 and 3
+        * MATE
+        * XFCE 4
+
+       I plan to get it working with the following as well:
+        * KDE 5
+        * LXDE/LXQT
+
+       The following might be supported if I can figure out how to do it:
+        * E17
+        * Enlightenment
+        * KDE 4'''
+    searchpath = os.get_exec_path()
+    cmds = [
+        ['gnome-session-quit', '--power-off', '--force'],
+        ['cinnamon-session-quit', '--power-off', '--force'],
+        ['mate-session-quit', '--power-off', '--force'],
+        ['xfce4-session-logout', '--halt']
+    ]
+    for cmd in cmdlist:
+        for search in searchpath:
+            if os.access(os.path.join(search, cmd[0]), os.X_OK):
+                try:
+                    status = subprocess.check_call(cmd, shell=True)
+                    if status == 0:
+                        return True
+                except subprocess.SubprocessError:
+                    pass
+    return False
+
 def _generic_unix_reboot():
     '''Internal function that tries methods that are generic to most UNIX systems.
 
@@ -164,6 +199,8 @@ def shutdown():
        (which may not mean that they actually did work).'''
     if os.name == 'posix':
         if sys.platform.startswith('linux'):
+            if _unix_gui_shutdown():
+                return True
             if _generic_unix_shutdown():
                 return True
             raise NoWorkingMethod
@@ -184,6 +221,8 @@ def shutdown():
             if _generic_unix_shutdown():
                 return True
             raise NoWorkingMethod
+        if _unix_gui_shutdown():
+            return True
         if _generic_unix_shutdown():
             return True
         raise NoWorkingMethod

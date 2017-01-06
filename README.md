@@ -32,6 +32,13 @@ users on UNIX-like systems:
  * pkexec (PolicyKit, requires special setup and is pretty much completely
    untested)
 
+Session manager integration is offered for the following desktop
+environments on (most) UNIX-like systems:
+ * GNOME (both 2 and 3)
+ * MATE
+ * Cinnamon
+ * XFCE4
+
 ### Platform support ###
 ###### Linux ######
 Supports the following functionality:
@@ -40,8 +47,8 @@ Supports the following functionality:
  * Suspend to disk/hibernate
  * Suspend to RAM
 
-Session management integration is currently not implemented, but is
-planned.
+Session management integration is incomplete, we currently don't have
+support for KDE or LXDE/LXQT.
 
 ###### BSD ######
 Supports the following functionality:
@@ -49,8 +56,8 @@ Supports the following functionality:
  * Reboot
  * Suspend to RAM (untested, probably only works on FreeBSD)
 
-As with Linux, session management integration is not currently
-implemented, but support is planned.
+Session management integration is incomplete, we currently don't have
+support for KDE or LXDE/LXQT.
 
 Suspend to RAM support for BSD is completely untested, it may or may
 not work, and the method used is based on FreeBSD documentation, so it
@@ -62,9 +69,9 @@ Supports the following functionality:
  * Reboot
  * Suspend to RAM
 
-Current support is very rudimentary and lacks proper desktop integration.
-I hope to eventually have proper support, but it's not a priority for
-me since I don't use OS X myself.
+Current support is very rudimentary, requires special setup, and lacks
+proper desktop integration.  I hope to eventually have proper support,
+but it's not a priority for me since I don't use OS X myself.
 
 I'm about 90% certain that OS X actually does a hybrid sleep when you
 tell it to suspend.  It's impossible to be 100% certain though because
