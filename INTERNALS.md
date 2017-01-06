@@ -130,3 +130,11 @@ It is what gets used by pm-utils if it's availible.
 4. Direct writes to /sys/power/state: This only works as root, and
 directly invokes kerenl level support for the requested function.
 We check first to see if the kernel says it supports the requested mode.
+
+### Session manager integration on Linux (and other UNIX-like systems) ###
+This is actually a rather tough part.  Some desktop environments use
+essentially the same command (GNOME, MATE, and Cinnamon all use the same
+command with a different prefix), but most don't, and some (KDE and LXDE
+for example) direct DBus based RPC.  There are also a handful of desktop
+environments taht don't have any session manager (CDE for example),
+and we can't really do anything about those.

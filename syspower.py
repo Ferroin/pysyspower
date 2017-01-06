@@ -155,7 +155,7 @@ def _unix_gui_shutdown():
         ['cinnamon-session-quit', '--power-off', '--force'],
         ['mate-session-quit', '--power-off', '--force'],
         ['xfce4-session-logout', '--halt'],
-        ['qdbus',  'org.kde.ksmserver', '/KSMServer', 'org.kde.KSMServerInterface.logout', '0', '2', '2']
+        ['qdbus', 'org.kde.ksmserver', '/KSMServer', 'org.kde.KSMServerInterface.logout', '0', '2', '2']
     ]
     for cmd in cmds:
         for search in searchpath:
@@ -250,6 +250,34 @@ def _linux_hybrid_sleep():
                     return True
     except (subprocess.SubprocessError, IOError, OSError):
         pass
+    return False
+
+def _unix_gui_logout():
+    '''Try to log out of whatever graphical session we're in.
+
+       This currently works with:
+        * Cinnamon
+        * GNOME 2 and 3
+        * MATE
+        * XFCE 4
+        * KDE 4 and 5'''
+    searchpath = os.get_exec_path()
+    cmds = [
+        ['gnome-session-quit', '--logout', '--force'],
+        ['cinnamon-session-quit', '--logout', '--force'],
+        ['mate-session-quit', '--logout', '--force'],
+        ['xfce4-session-logout', '--logout'],
+        ['qdbus', 'org.kde.ksmserver', '/KSMServer', 'org.kde.KSMServerInterface.logout', '0', '2', '3'],
+    ]
+    for cmd in cmds:
+        for search in searchpath:
+            if os.access(os.path.join(search, cmd[0]), os.X_OK):
+                try:
+                    status = subprocess.check_call(cmd, shell=True)
+                    if status == 0:
+                        return True
+                except subprocess.SubprocessError:
+                    pass
     return False
 
 
@@ -435,5 +463,28 @@ def hybrid_sleep():
             raise NoWorkingMethodError
         else:
             raise UnsupportedOperationError
+    else:
+        raise UnsupportedOperationError
+
+def logout():
+    '''Log out of the current session.
+
+       This only works when called from inside a desktop session as the
+       user who  owns the session.'''
+    if os.name == 'posix':
+        if sys.platform.startswith('darwin'):
+            raise UnsupportedOperationError
+        else:
+            if _unix_gui_logout():
+                return True
+            raise NoWorkingMethodError
+    elif os.name == 'nt':
+        try:
+            status = subprocess.check_call(['shutdown', '/l'], shell=True)
+            if status == 0:
+                return True
+        except subprocess.SubprocessError:
+            pass
+        raise NoWorkingMethodError
     else:
         raise UnsupportedOperationError

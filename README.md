@@ -23,10 +23,10 @@ implemented on at least one supported platform:
  * Suspend to disk
  * Suspend to RAM
  * Hybrid suspend
+ * Log out of the current GUI session
 
 The following functions are planned to be implemented:
  * Lock screen/activate screensaver
- * Log out
 
 The following methods of privilege elevation are supported for non-root
 users on UNIX-like systems:
@@ -41,7 +41,7 @@ environments on (most) UNIX-like systems:
  * MATE
  * Cinnamon
  * XFCE4
- * KDE (shutdown support only)
+ * KDE (shutdown and logout support only)
 
 ### Platform support ###
 ###### Linux ######
@@ -51,18 +51,20 @@ Supports the following functionality:
  * Suspend to disk/hibernate
  * Suspend to RAM
  * Hybrid suspend
+ * Log out of the current GUI session
 
-Session management integration is incomplete, we currently don't have
-proper support for KDE or LXDE/LXQT.
+Session management integration is incomplete, KDE is only partially
+supported, and LXDE can't be supported without some complex DBus RPC's.
 
 ###### BSD ######
 Supports the following functionality:
  * Shutdown
  * Reboot
  * Suspend to RAM (untested, probably only works on FreeBSD)
+ * Log out of the current GUI session
 
-Session management integration is incomplete, we currently don't have
-proper support for KDE or LXDE/LXQT.
+Session management integration is incomplete, KDE is only partially
+supported, and LXDE can't be supported without some complex DBus RPC's.
 
 Suspend to RAM support for BSD is completely untested, it may or may
 not work, and the method used is based on FreeBSD documentation, so it
@@ -88,6 +90,8 @@ sleep, then I'll move the support into that function instead.
 Supports the following functionality:
  * Shutdown
  * Reboot
+ * Log out of the current GUI session (only for supported desktop
+   environments)
 
 In general, this stuff _should_ work on most other UNIX-like systems,
 but I can't make any guarantees because I've only based this code on
@@ -109,6 +113,7 @@ Supports the following functionality:
  * Shutdown
  * Reboot
  * Suspend to disk/hibernate
+ * Log out of the current GUI session
 
 On current versions of Windows (8 and newer), there's no practical way
 that I know of to get the system to actually suspend to RAM  without
@@ -120,7 +125,8 @@ send me a (tested) patch, and I'll be happy to include it.
  * Implement missing functionality, and document what can't be implemented.
  * Get proper installation tools set up.
  * Add support for more privilege elevation tools on UNIX.
- * Wire up code so syspower can be used as a cross-platform shutdown script (useful for testing).
+ * Wire up code so syspower can be used as a cross-platform shutdown
+   script (useful for testing).
 
 ### API ###
 The external API is actually remarkably simple.  There is one function
@@ -130,9 +136,11 @@ for each supported operation:
  * suspend()
  * hibernate()
  * hybrid_sleep()
-They all work relatively similarly, determining first the type of system,
-and then running through known methods of effecting the requested
-operation on that system.
+ * logout()
+They all work relatively similarly, determining first the type of
+system, and then running through known methods of effecting the requested
+operation on that system.  None of them take any argument, and most are
+likely to never return.
 
 If the requested operation isn't supported, you'll get a
 UnsupportedOperationError.  This means that either the current system
