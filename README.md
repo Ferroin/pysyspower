@@ -35,10 +35,11 @@ users on UNIX-like systems:
 
 Session manager integration is offered for the following desktop
 environments on (most) UNIX-like systems:
- * GNOME (both 2 and 3)
+ * GNOME (2.10 and newer)
  * MATE
  * Cinnamon
  * XFCE4
+ * KDE (shutdown support only)
 
 ### Platform support ###
 ###### Linux ######
@@ -50,7 +51,7 @@ Supports the following functionality:
  * Hybrid suspend
 
 Session management integration is incomplete, we currently don't have
-support for KDE or LXDE/LXQT.
+proper support for KDE or LXDE/LXQT.
 
 ###### BSD ######
 Supports the following functionality:
@@ -59,7 +60,7 @@ Supports the following functionality:
  * Suspend to RAM (untested, probably only works on FreeBSD)
 
 Session management integration is incomplete, we currently don't have
-support for KDE or LXDE/LXQT.
+proper support for KDE or LXDE/LXQT.
 
 Suspend to RAM support for BSD is completely untested, it may or may
 not work, and the method used is based on FreeBSD documentation, so it

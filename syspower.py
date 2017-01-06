@@ -141,21 +141,21 @@ def _unix_gui_shutdown():
         * GNOME 2 and 3
         * MATE
         * XFCE 4
+        * KDE 4 and 5
 
-       I plan to get it working with the following as well:
-        * KDE 5
+       I plan to try to get it working with the following as well:
         * LXDE/LXQT
 
        The following might be supported if I can figure out how to do it:
         * E17
-        * Enlightenment
-        * KDE 4'''
+        * Enlightenment '''
     searchpath = os.get_exec_path()
     cmds = [
         ['gnome-session-quit', '--power-off', '--force'],
         ['cinnamon-session-quit', '--power-off', '--force'],
         ['mate-session-quit', '--power-off', '--force'],
-        ['xfce4-session-logout', '--halt']
+        ['xfce4-session-logout', '--halt'],
+        ['qdbus',  'org.kde.ksmserver', '/KSMServer', 'org.kde.KSMServerInterface.logout', '0', '2', '2']
     ]
     for cmd in cmds:
         for search in searchpath:
