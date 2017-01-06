@@ -220,6 +220,32 @@ def _linux_hibernate():
         pass
     return False
 
+def _linux_hybrid_sleep():
+    '''Internal function to try different hybrid-sleep methods on Linux.
+
+       Does not currently have session management integration (and
+       may never, as no session managers I know of support this
+       themselves).'''
+    cmdlist = [
+        ['systemctl', 'hybrid-sleep'],
+        ['pm-suspend-hybrid'],
+        ['s2both']
+    ]
+    if _try_commands(cmdlist):
+        return True
+    try:
+        # This only works if we're root, and the other methods are much
+        # safer for userspace, but if we're root this is certain to work
+        # (assuming the hardware and driver work correctly.
+        support = subprocess.check_output(['cat', '/sys/power/state'], shell=True)
+        if support.find(b'hybrid') != -1:
+            with open('/sys/power/state', 'wb') as state:
+                if state.write('hybrid'):
+                    return True
+    except (subprocess.SubprocessError, IOError, OSError):
+        pass
+    return False
+
 
 def shutdown():
     '''Initiate a system shutdown.
@@ -382,5 +408,26 @@ def hibernate():
         except subprocess.SubprocessError:
             pass
         raise NoWorkingMethod
+    else:
+        raise UnsupportedOperation
+
+def hybrid_sleep():
+    '''Enter hybrid sleep.
+
+       Hybrid sleep consists of doing everything needed for hibernation,
+       except instead of powering off you enter ACPI S3 (suspend to
+       RAM) state.  In most cases, you can start back up just as fast
+       as from regular uspend, but if have a power failure, you don't
+       lose anything (and start up as if from hibernation).
+
+       Note that this is not the same as Windows 'Fast Startup', which
+       is sometimes called a hybrid shutdown or hybrid sleep.'''
+    if os.name == 'posix':
+        if sys.platform.startswith('linux'):
+            if _linux_hybrid_sleep():
+                return True
+            raise NoWorkingMethod
+        else:
+            raise UnsupportedOperation
     else:
         raise UnsupportedOperation

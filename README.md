@@ -20,6 +20,7 @@ implemented on at least one supported platform:
  * Reboot
  * Suspend to disk
  * Suspend to RAM
+ * Hybrid suspend
 
 The following functions are planned to be implemented:
  * Lock screen/activate screensaver
@@ -46,6 +47,7 @@ Supports the following functionality:
  * Reboot
  * Suspend to disk/hibernate
  * Suspend to RAM
+ * Hybrid suspend
 
 Session management integration is incomplete, we currently don't have
 support for KDE or LXDE/LXQT.
@@ -74,11 +76,10 @@ proper desktop integration.  I hope to eventually have proper support,
 but it's not a priority for me since I don't use OS X myself.
 
 I'm about 90% certain that OS X actually does a hybrid sleep when you
-tell it to suspend.  It's impossible to be 100% certain though because
-of the tight firmware integration of the OS and the inability to verify
-if anything is powered.  However, because the resume behavior is
-consistent in all cases I've seen with suspend to RAM performance for
-other systems, I'm listing it as such since it fills a similar usage.
+tell it to suspend.  I don't have the hardware (or time) to verify this,
+but most of the documentation seems to indicate that it's just a suspend,
+so I'm putting it here.  If I can verify that this is in fact a hybrid
+sleep, then I'll move the support into that function instead.
 
 ###### Other UNIX-like systems ######
 Supports the following functionality:
