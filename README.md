@@ -13,6 +13,8 @@ pysyspower needs at minimum Python 3.1, but has no other dependencies
 beyond the standard library and the basic tools already found on most
 systems.
 
+For info on how this all actually works, check ./INTERNALS.md
+
 ### Functionality ###
 As of right now, the following functions are at least partially
 implemented on at least one supported platform:
