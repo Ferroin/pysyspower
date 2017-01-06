@@ -449,14 +449,6 @@ def hibernate():
             raise NoWorkingMethodError
         elif sys.platform.startswith('darwin'):
             raise UnsupportedOperationError
-        elif sys.platform.find('BSD') != -1:
-            try:
-                status = subprocess.check_call(['pm-hibernate'], shell=True)
-                if status == 0:
-                    return True
-            except subprocess.SubprocessError:
-                pass
-            raise NoWorkingMethodError
         else:
             raise UnsupportedOperationError
     elif os.name == 'nt':

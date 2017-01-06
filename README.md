@@ -58,12 +58,8 @@ Supports the following functionality:
 Supports the following functionality:
  * Shutdown
  * Reboot
- * Suspend to RAM (untested, probably only works on FreeBSD)
+ * Suspend to RAM (FreeBSD only)
  * Log out of the current GUI session
-
-Suspend to RAM support for BSD is completely untested, it may or may
-not work, and the method used is based on FreeBSD documentation, so it
-may or may not work on other BSD systems.
 
 ###### macOS / OS X ######
 Supports the following functionality:
