@@ -118,3 +118,29 @@ send me a (tested) patch, and I'll be happy to include it.
  * Implement missing functionality, and document what can't be implemented.
  * Get proper installation tools set up.
  * Add support for more privilege elevation tools on UNIX.
+ * Wire up code so syspower can be used as a cross-platform shutdown script (useful for testing).
+
+### API ###
+The external API is actually remarkably simple.  There is one function
+for each supported operation:
+ * shutdown()
+ * reboot()
+ * suspend()
+ * hibernate()
+ * hybrid_sleep()
+They all work relatively similarly, determining first the type of system,
+and then running through known methods of effecting the requested
+operation on that system.
+
+If the requested operation isn't supported, you'll get a
+UnsupportedOperationError.  This means that either the current system
+just doesn't support that operation, or that I know of no way to implement
+that operation on this system without needing extra dependencies.
+
+If the we can't find a way to perform the requested operation (for
+example, you're a non-root user on UNIX and don't have anything set up
+that would let you run privileged commands without a password), then
+you'll get a NoWorkingMethodError.
+
+Both exception classes are subtypes of SyspowerException, so you can
+use that to catch either type.
