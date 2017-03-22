@@ -22,7 +22,8 @@ implemented on at least one supported platform:
  * Reboot
  * Suspend to disk
  * Suspend to RAM
- * Hybrid suspend
+ * Hybrid suspend (prepares everything for suspend to disk, then suspends
+   to RAM).
  * Log out of the current GUI session
 
 The following functions are planned to be implemented:
@@ -126,8 +127,9 @@ for each supported operation:
  * reboot()
  * suspend()
  * hibernate()
- * hybrid_sleep()
+ * hybrid\_sleep()
  * logout()
+
 They all work relatively similarly, determining first the type of
 system, and then running through known methods of effecting the requested
 operation on that system.  None of them take any argument, and most are
@@ -138,7 +140,7 @@ UnsupportedOperationError.  This means that either the current system
 just doesn't support that operation, or that I know of no way to implement
 that operation on this system without needing extra dependencies.
 
-If the we can't find a way to perform the requested operation (for
+If syspower can't find a way to perform the requested operation (for
 example, you're a non-root user on UNIX and don't have anything set up
 that would let you run privileged commands without a password), then
 you'll get a NoWorkingMethodError.

@@ -172,7 +172,7 @@ def _generic_unix_reboot():
     return _try_commands(cmdlist)
 
 def _unix_gui_reboot():
-    '''Try all the different session management shutdown commands we know about.
+    '''Try all the different session management reboot commands we know about.
 
        This currently works with:
         * Cinnamon

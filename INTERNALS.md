@@ -40,7 +40,7 @@ not need an object to iterate over a list of possible commands and try
 each one).  For comparison, I actually did take the time to write out
 an OO version of syspower, it was more than 4 times as long and had
 almost twice the overhead of the procedural version I've published,
-wich no net benefit.
+with no net benefit.
 
 ### Windows support ###
 All of the operations we support on Windows are multiplexed through
@@ -76,7 +76,7 @@ For shutdown and reboot, we try the following In order:
 1. GUI session manager interfaces.  Doing this first ensures that any
 running desktop handles things correctly if possible.  This is currently
 skipped on OS X since I know nothing aobut how to make RPC's against
-the session manager.
+the session manager and can't find any verifiable documentation.
 2. If we're on Solaris, try the weird shutdown command found on newer
 versions.
 3. If we're running as EUID=0 (root on most systems), try all the generic
@@ -133,8 +133,8 @@ We check first to see if the kernel says it supports the requested mode.
 
 ### Session manager integration on Linux (and other UNIX-like systems) ###
 This is actually a rather tough part.  Some desktop environments use
-essentially the same command (GNOME, MATE, and Cinnamon all use the same
-command with a different prefix), but most don't, and some (KDE and LXDE
-for example) direct DBus based RPC.  There are also a handful of desktop
-environments taht don't have any session manager (CDE for example),
-and we can't really do anything about those.
+essentially the same command (GNOME, MATE, and Cinnamon all use the
+same command with a different prefix), but most don't, and some (KDE
+and LXDE for example) require direct DBus based RPC.  There are also
+a handful of desktop environments that don't have any session manager
+(CDE for example), and we can't really do anything about those.
